@@ -1,38 +1,43 @@
--- Załaduj bibliotekę LuaSocket
-local http = require('socket.http')
-local ltn12 = require('ltn12')
+local http = require("socket.http")
+local https = require("ssl.https")
+local ltn12 = require("ltn12")
+local json = require("cjson")
 
--- URL API ChatGPT
-local url = 'https://api.openai.com/v1/engines/davinci-codex/completions'
+local function send_completion_request(keyword)
+    local url = "https://api.openai.com/v1/chat/completions"
+    local api_key = "YOUR API KEY"
+    local headers = {
+        ["Authorization"] = "Bearer " .. api_key,
+        ["Content-Type"] = "application/json"
+    }
+    local data = {
+        model = "gpt-3.5-turbo",
+        messages = {
+            {role = "user", content = keyword}
+        }
+    }
+    local response_body = {}
 
--- Twoje dane uwierzytelniające do API
-local headers = {
-  ["Content-Type"] = "application/json",
-  ["Authorization"] = "Bearer YOUR_OPENAI_API_KEY"
-}
+    local res, code, response_headers = http.request{
+        url = url,
+        method = "POST",
+        headers = headers,
+        source = ltn12.source.string(json.encode(data)),
+        sink = ltn12.sink.table(response_body)
+    }
 
--- Dane wejściowe dla zapytania do API
-local data = {
-  prompt = "Translate the following English text to French: '{}'",
-  max_tokens = 60
-}
-
--- Zamień dane na format JSON
-local json_data = require('json').encode(data)
-
--- Przygotuj zapytanie
-local response = {}
-local request_body, err = http.request{
-  url = url,
-  method = "POST",
-  headers = headers,
-  source = ltn12.source.string(json_data),
-  sink = ltn12.sink.table(response)
-}
-
--- Obsłuż błędy
-if err then
-  print('Wystąpił błąd: ', err)
-else
-  print(table.concat(response))
+    if code == 200 then
+        local response_json = table.concat(response_body)
+        local response = json.decode(response_json)
+        for _, choice in ipairs(response.choices) do
+            print(choice.message.content)
+        end
+    else
+        error("Request failed with status code " .. code)
+    end
 end
+
+-- Przykładowe użycie
+local keyword = "Hi there, from Lua API handler!"
+send_completion_request(keyword)
+
