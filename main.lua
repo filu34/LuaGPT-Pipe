@@ -37,7 +37,7 @@ local function send_completion_request(keyword)
     end
 end
 
--- Przykładowe użycie
+-- Use example
 local keyword = "Hi there, from Lua API handler!"
 send_completion_request(keyword)
 
