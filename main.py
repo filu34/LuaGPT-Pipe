@@ -1,11 +1,11 @@
 import requests
 import json
 
-# Ustawienia API
+# API Settings
 api_key = 'YOUR API KEY'
 url = 'https://api.openai.com/v1/chat/completions'
 
-# Funkcja do wysyłania zapytania do API
+# Function to send request to API
 def send_completion_request(prompt):
     headers = {
         'Content-Type': 'application/json',
@@ -21,7 +21,7 @@ def send_completion_request(prompt):
     else:
         raise Exception(f'Request failed with status code {response.status_code}')
 
-# Przykładowe użycie
+# Use Example
 prompt = "Translate the following English text to French: 'Hello, how are you?'"
 response = send_completion_request(prompt)
 completion = response['choices'][0]['text']
